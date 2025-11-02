@@ -5,6 +5,7 @@
 
 #include <xboot.h>
 #include <gx6605s-spi.h>
+#include <sys-spinor.h>
 
 static void __startup spi_sel(int sel)
 {
@@ -77,7 +78,7 @@ static bool_t __startup sys_spinor_detect(void)
     return cmd[5] == (uint8_t)IMAGE_MAGIC;
 }
 
-void __startup sys_spinor_read(uint8_t *buff, size_t addr, uint32_t len)
+int __startup sys_spinor_read(uint8_t *buff, size_t addr, uint32_t len)
 {
     unsigned int cmdlen;
     uint8_t cmd[5];
@@ -101,4 +102,6 @@ void __startup sys_spinor_read(uint8_t *buff, size_t addr, uint32_t len)
     spi_transmit(cmd, NULL, cmdlen);
     spi_transmit(NULL, buff, len);
     spi_sel(FALSE);
+
+    return 0;
 }

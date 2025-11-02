@@ -6,69 +6,72 @@
 #ifndef __GX6605S_H__
 #define __GX6605S_H__
 
-#include <xboot.h>
+#include <configs.h>
+#include <stdint.h>
+#include <types.h>
+#include <sizes.h>
+#include <io.h>
+#include <sys-timer.h>
 
-#define MHZ         1000000UL
-#define osc_freq    (27 * MHZ)
-#define dto_freq    (CONFIG_PRELOAD_DTO_CLK * MHZ)
-#define dvb_freq    (CONFIG_PRELOAD_DVB_CLK * MHZ)
-#define cpu_freq    (CONFIG_PRELOAD_CPU_CLK * MHZ)
-#define axi_freq    (CONFIG_PRELOAD_AXI_CLK * MHZ)
-#define ahb_freq    (CONFIG_PRELOAD_AHB_CLK * MHZ)
-#define apb_freq    (CONFIG_PRELOAD_APB_CLK * MHZ)
-#define dram_freq   (CONFIG_PRELOAD_DRAM_CLK * MHZ)
-#define uart_freq   (CONFIG_PRELOAD_UART_CLK)
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#define SSEG0_BASE  ((virtual_addr_t)0x80000000)
-#define SSEG1_BASE  ((virtual_addr_t)0xa0000000)
-#define KVMR_BASE   ((virtual_addr_t)0xc0000000)
+/*
+ * Processor and memory
+ */
+#define CSKY_CPU_FREQ		(CONFIG_PRELOAD_CPU_CLK * 1000 * 1000)
+#define CSKY_AXI_FREQ		(CONFIG_PRELOAD_AXI_CLK * 1000 * 1000)
+#define CSKY_AHB_FREQ		(CONFIG_PRELOAD_AHB_CLK * 1000 * 1000)
+#define CSKY_APB_FREQ		(CONFIG_PRELOAD_APB_CLK * 1000 * 1000)
+#define CSKY_DRAM_FREQ		(CONFIG_PRELOAD_DRAM_CLK * 1000 * 1000)
+#define CSKY_DTO_FREQ		(CONFIG_PRELOAD_DTO_CLK * 1000 * 1000)
+#define CSKY_UART_FREQ		(CONFIG_PRELOAD_UART_CLK)
 
-#define TIM_BASE    (SSEG1_BASE + 0x0020a000)
-#define WDT_BASE    (SSEG1_BASE + 0x0020b000)
-#define SPI_BASE    (SSEG1_BASE + 0x00302000)
-#define GPIO_BASE   (SSEG1_BASE + 0x00305000)
-#define GCTL_BASE   (SSEG1_BASE + 0x0030a000)
-#define SER_BASE    (SSEG1_BASE + 0x00400000)
-#define DRAMC_BASE  (SSEG1_BASE + 0x00c00000)
-#define DRAM_BASE   (SSEG0_BASE + 0x10000000)
+/*
+ * Image properties
+ */
+#define IMAGE_POS			(0x10000)
+#define IMAGE_SIZE			(0x200000)
 
-#define __startup       __attribute__((__section__(".startup.text")))
-#define __startup_data  __attribute__((__section__(".startup.data")))
+/*
+ * DRAM
+ */
+#define DRAM_BASE			(0x90000000)
 
-extern uint8_t _ld_image_start;
-extern uint8_t _ld_image_end;
-#define IMAGE_SIZE ((uint32_t)&_ld_image_end - (uint32_t)&_ld_image_start)
-#define IMAGE_MAGIC 0x55aa55aaU
-#define IMAGE_POS sizeof(IMAGE_MAGIC)
+/*
+ * Peripherals
+ */
+#define GCTL_BASE			(0xb0000000)
+#define DRAMC_BASE			(0xb0010000)
+#define SPI_BASE			(0xb0020000)
+#define TIM_BASE			(0xb0030000)
+#define SER_BASE			(0xb0040000)
 
-static inline virtual_addr_t cache_to_dma(virtual_addr_t cache)
+#define SSEG1_BASE			(0x00000000)
+
+#define IMAGE_MAGIC			(0x55aa55aa)
+
+#define MHZ					(1000000)
+
+#define osc_freq			(24 * MHZ)
+#define dto_freq			(CSKY_DTO_FREQ)
+#define dvb_freq			(CONFIG_PRELOAD_DVB_CLK * 1000 * 1000)
+
+#define __startup			__attribute__((__section__(".startup.text")))
+#define __startup_data		__attribute__((__section__(".startup.data")))
+
+/*
+ * The csky architecture uses a direct-mapped memory model, so the
+ * physical address is the same as the virtual address.
+ */
+static inline virtual_addr_t cache_to_dma(virtual_addr_t addr)
 {
-    if (cache < SSEG0_BASE || cache >= SSEG1_BASE)
-        return 0;
-    return (cache - SSEG0_BASE) + SSEG1_BASE;
+	return addr;
 }
 
-static inline virtual_addr_t dma_to_cache(virtual_addr_t dma)
-{
-    if (dma < SSEG1_BASE || dma >= KVMR_BASE)
-        return 0;
-    return (dma - SSEG1_BASE) + SSEG0_BASE;
+#ifdef __cplusplus
 }
+#endif
 
-extern __startup void halt(void);
-extern __startup void sys_ccu_cpu(uint32_t dto, uint32_t freq);
-extern __startup void sys_ccu_axi(uint32_t cpu, uint32_t freq);
-extern __startup void sys_ccu_ahb(uint32_t cpu, uint32_t freq);
-extern __startup void sys_ccu_apb(uint32_t dto, uint32_t freq);
-extern __startup void sys_ccu_dram(uint32_t freq);
-extern __startup void sys_ccu_init(void);
-extern __startup void sys_dramc_init(void);
-extern __startup void sys_uart_putc(char ch);
-extern __startup void sys_uart_print(const char *str);
-extern __startup void sys_uart_init(uint32_t apb, uint32_t freq);
-extern __startup void sys_spinor_init(void);
-extern __startup void sys_spinor_read(uint8_t *buff, uint32_t addr, uint32_t len);
-extern __startup void tim_mdelay(uint32_t ms);
-extern __startup void tim_init(uint32_t freq);
-
-#endif  /* __GX6605S_H__ */
+#endif /* __GX6605S_H__ */

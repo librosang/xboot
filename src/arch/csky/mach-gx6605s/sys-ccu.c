@@ -7,10 +7,9 @@
 #include <gx6605s.h>
 #include <gx6605s-gctl.h>
 
-static uint32_t __startup pll_get_factors(uint32_t freq, uint32_t *n, uint32_t *m)
+static uint32_t pll_get_factors(uint32_t freq, uint32_t *n, uint32_t *m)
 {
     uint32_t div, pll;
-
     if (freq > 1152 * MHZ)
         div = 2;
     else if (freq > 864 * MHZ)
@@ -26,7 +25,7 @@ static uint32_t __startup pll_get_factors(uint32_t freq, uint32_t *n, uint32_t *
     return osc_freq / div * pll;
 }
 
-static void __startup dto_freq_set(unsigned int channel, uint32_t fin, uint32_t freq)
+static void dto_freq_set(unsigned int channel, uint32_t fin, uint32_t freq)
 {
     uint32_t div = (freq / 1000) / (fin / 1000000) * 1073741;
     virtual_addr_t reg = GCTL_BASE + GX6605S_DTO0_CONFIG + (4 * (channel - 1));
@@ -50,7 +49,7 @@ static void __startup dto_freq_set(unsigned int channel, uint32_t fin, uint32_t 
  * @freq: freq want to set
  * @return: set success freq
  */
-void __startup sys_ccu_cpu(uint32_t dto, uint32_t freq)
+void sys_ccu_cpu(uint32_t dto, uint32_t freq)
 {
     return dto_freq_set(12, dto, freq);
 }
@@ -60,10 +59,9 @@ void __startup sys_ccu_cpu(uint32_t dto, uint32_t freq)
  * @freq: freq want to set
  * @return: set success freq
  */
-void __startup sys_ccu_axi(uint32_t cpu, uint32_t freq)
+void sys_ccu_axi(uint32_t cpu, uint32_t freq)
 {
     uint32_t val, div = cpu / freq;
-
     val = read32(GCTL_BASE + GX6605S_CLOCK_DIV_CONFIG1);
     val &= ~(0x0f << 0);
     val |= (div & 0x0f) << 0;
@@ -76,10 +74,9 @@ void __startup sys_ccu_axi(uint32_t cpu, uint32_t freq)
  * @return: set success freq
  * TODO: computational problems
  */
-void __startup sys_ccu_ahb(uint32_t cpu, uint32_t freq)
+void sys_ccu_ahb(uint32_t cpu, uint32_t freq)
 {
     uint32_t val;
-
     /* 0x07 is five div */
     val = read32(GCTL_BASE + GX6605S_SOURCE_SEL1);
     val &= ~(0x0f << 28);
@@ -97,10 +94,9 @@ void __startup sys_ccu_ahb(uint32_t cpu, uint32_t freq)
  * @freq: freq want to set
  * @return: set success freq
  */
-void __startup sys_ccu_apb(uint32_t dto, uint32_t freq)
+void sys_ccu_apb(uint32_t dto, uint32_t freq)
 {
     uint32_t val;
-
     dto_freq_set(10, dto, freq); /* APB ir and other*/
     val = read32(GCTL_BASE + GX6605S_SOURCE_SEL0);
     val |= GX6605S_SOURCE_SEL0_APB;
@@ -117,10 +113,9 @@ void __startup sys_ccu_apb(uint32_t dto, uint32_t freq)
  * @freq: freq want to set
  * @return: set success freq
  */
-void __startup sys_ccu_dram(uint32_t freq)
+void sys_ccu_dram(uint32_t freq)
 {
     uint32_t val, n, m;
-
     pll_get_factors(freq, &n, &m);
     write32(GCTL_BASE + GX6605S_PLL_DDR_BASE, (1 << 14)|(n << 8)| m);
     val = read32(GCTL_BASE + GX6605S_PLL_DDR_BASE);
@@ -133,10 +128,9 @@ void __startup sys_ccu_dram(uint32_t freq)
     write32(GCTL_BASE + GX6605S_SOURCE_SEL0, val);
 }
 
-void __startup sys_ccu_init(void)
+void sys_ccu_init(void)
 {
     uint32_t val, n, m;
-
     write32(GCTL_BASE + GX6605S_SOURCE_SEL0, 0);
 
     pll_get_factors(dto_freq, &n, &m);

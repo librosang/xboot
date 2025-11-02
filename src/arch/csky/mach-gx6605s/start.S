@@ -136,7 +136,7 @@ sgot_loop:
 
     lrw         r1, 0x104000
     mov         sp, r1
-    bsr         sys_copyself
+    bsr         sys_init
     jmpi        _start
 
 normal_setup:

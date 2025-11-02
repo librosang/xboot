@@ -15,7 +15,7 @@ INCDIRS		:=
 SRCDIRS		:= arch/$(ARCH)/$(MACH)/driver/video
 
 export arch/$(ARCH)/$(MACH)/sys-ccu-flags 		:= -fPIC
-export arch/$(ARCH)/$(MACH)/sys-copyself-flags	:= -fPIC
+export arch/$(ARCH)/$(MACH)/sys-init-flags	:=
 export arch/$(ARCH)/$(MACH)/sys-dram-flags		:= -fPIC
 export arch/$(ARCH)/$(MACH)/sys-spinor-flags	:= -fPIC
 export arch/$(ARCH)/$(MACH)/sys-timer-flags		:= -fPIC
