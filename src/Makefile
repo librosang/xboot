@@ -87,6 +87,8 @@ LDFLAGS		+=	-Wl,-gc-sections
 # Add necessary directory for INCDIRS and SRCDIRS.
 #
 INCDIRS		+=	include \
+				include/vfs \
+				include \
 				arch/$(ARCH)/include \
 				arch/$(ARCH)/$(MACH)/include
 

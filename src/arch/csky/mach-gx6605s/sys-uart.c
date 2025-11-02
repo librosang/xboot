@@ -5,6 +5,7 @@
 
 #include <gx6605s-uart.h>
 #include <gx6605s-gctl.h>
+#include <bits.h>
 
 void __startup sys_uart_putc(char ch)
 {

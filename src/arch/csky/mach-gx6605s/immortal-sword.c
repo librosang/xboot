@@ -5,6 +5,7 @@
 
 #include <xboot.h>
 #include <gx6605s.h>
+#include <sys-uart.h>
 
 static int mach_detect(struct machine_t * mach)
 {
